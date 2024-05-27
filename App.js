@@ -39,12 +39,15 @@ export default function App() {
         <Text>Carregando...</Text>
       ) : (
         data && (
-          <View style={styles.dataContainer}>
+          <View style={styles.dataBox}>
             <Text style={styles.dataText}>Últimos Dados:</Text>
-            <Text style={styles.dataText}>Value1: {data.value1}</Text>
-            <Text style={styles.dataText}>Value2: {data.value2}</Text>
-            <Text style={styles.dataText}>Value3: {data.value3}</Text>
-            <Text style={styles.dataText}>Reading Time: {data.reading_time}</Text>
+            <Text style={styles.dataLabel}>Local: {data.location}</Text>
+            <Text style={styles.dataText}></Text>
+            <Text style={styles.dataLabel}>Umidade do Ar: <Text style={styles.dataValue}>{data.value1} %</Text></Text>
+            <Text style={styles.dataLabel}>Temperatura do Ar: <Text style={styles.dataValue}>{data.value2} °C</Text></Text>
+            <Text style={styles.dataLabel}>Umidade do Solo: <Text style={styles.dataValue}>{data.value3} %</Text></Text>
+            <Text style={styles.dataText}></Text>
+            <Text style={styles.dataText}>Última Atualização: {data.reading_time}</Text>
           </View>
         )
       )}
@@ -61,7 +64,7 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   logo: {
-    marginBottom: 60,
+    marginBottom: 10,
     width: 200,
     height: 200,
     resizeMode: 'contain'
@@ -69,7 +72,7 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: "#628A4C",
     width: "80%",
-    height: 50,
+    height: 40,
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
@@ -80,13 +83,30 @@ const styles = StyleSheet.create({
     color: "#FFF",
     textAlign: "center"
   },
-  dataContainer: {
-    marginTop: 20,
-    alignItems: 'center'
+  dataBox: {
+    backgroundColor: "#628A4C",
+    width: "80%",
+    padding: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 50,
   },
   dataText: {
     fontSize: 18,
-    color: "#333",
+    color: "#FFF",
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  dataLabel: {
+    fontSize: 18,
+    color: "#FFF",
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  dataValue: {
+    fontSize: 24,
+    color: "black",
     fontWeight: 'bold',
   }
 });
