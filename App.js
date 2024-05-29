@@ -11,9 +11,26 @@ export default function App() {
       try {
         const response = await fetch('http://foda.zapto.org/api/');
         const json = await response.json();
-        // Encontrar o item com o ID mais alto
-        const highestIdData = json.reduce((max, item) => (item.id > max.id ? item : max), json[0]);
-        setData(highestIdData);
+        
+        // Log para depuração
+        console.log("Dados recebidos da API:");
+
+        if (Array.isArray(json) && json.length > 0) {
+          // Encontrar o item com o ID mais alto
+          const highestIdData = json.reduce((max, item) => {
+            // Convertendo IDs para números antes de comparar
+            const itemId = parseFloat(item.id);
+            const maxId = parseFloat(max.id);
+            return itemId > maxId ? item : max;
+          }, json[0]);
+          
+          // Log para depuração
+          console.log("Item com o ID mais alto:", highestIdData);
+
+          setData(highestIdData);
+        } else {
+          console.error("Estrutura dos dados da API está incorreta ou está vazia");
+        }
         setLoading(false);
       } catch (error) {
         console.error("Erro ao buscar dados da API:", error);
@@ -21,7 +38,14 @@ export default function App() {
       }
     };
 
+    // Executar fetchData imediatamente
     fetchData();
+
+    // Configurar intervalo para atualizar dados a cada minuto
+    const interval = setInterval(fetchData, 60000);
+
+    // Limpar intervalo quando o componente for desmontado
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -43,10 +67,10 @@ export default function App() {
             <Text style={styles.dataText}>Últimos Dados:</Text>
             <Text style={styles.dataLabel}>Local: {data.location}</Text>
             <Text style={styles.dataText}></Text>
+            <Text style={styles.dataLabel}>ID: <Text style={styles.dataValue}>{data.id}</Text></Text>
             <Text style={styles.dataLabel}>Umidade do Ar: <Text style={styles.dataValue}>{data.value1} %</Text></Text>
             <Text style={styles.dataLabel}>Temperatura do Ar: <Text style={styles.dataValue}>{data.value2} °C</Text></Text>
             <Text style={styles.dataLabel}>Umidade do Solo: <Text style={styles.dataValue}>{data.value3} %</Text></Text>
-            <Text style={styles.dataText}></Text>
             <Text style={styles.dataText}>Última Atualização: {data.reading_time}</Text>
           </View>
         )
