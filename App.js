@@ -1,44 +1,48 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import axios from 'axios';
 
 export default function App() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    // Função para buscar dados da API
-    const fetchData = async () => {
-      try {
-        const response = await fetch('http://foda.zapto.org/api/');
-        const json = await response.json();
+  // Função para buscar dados da API
+  const fetchData = async () => {
+    setLoading(true); // Mostrar indicador de carregamento enquanto os dados são buscados
+    setError(null); // Resetar o estado de erro antes de tentar buscar os dados
+    try {
+      const response = await axios.get('http://foda.zapto.org/api/');
+      const json = response.data;
+      
+      // Log para depuração
+      console.log("Dados recebidos da API:");
+
+      if (Array.isArray(json) && json.length > 0) {
+        // Encontrar o item com o ID mais alto
+        const highestIdData = json.reduce((max, item) => {
+          const itemId = parseFloat(item.id);
+          const maxId = parseFloat(max.id);
+          return itemId > maxId ? item : max;
+        }, json[0]);
         
         // Log para depuração
-        console.log("Dados recebidos da API:");
+        console.log("Item com o ID mais alto:", highestIdData);
 
-        if (Array.isArray(json) && json.length > 0) {
-          // Encontrar o item com o ID mais alto
-          const highestIdData = json.reduce((max, item) => {
-            // Convertendo IDs para números antes de comparar
-            const itemId = parseFloat(item.id);
-            const maxId = parseFloat(max.id);
-            return itemId > maxId ? item : max;
-          }, json[0]);
-          
-          // Log para depuração
-          console.log("Item com o ID mais alto:", highestIdData);
-
-          setData(highestIdData);
-        } else {
-          console.error("Estrutura dos dados da API está incorreta ou está vazia");
-        }
-        setLoading(false);
-      } catch (error) {
-        console.error("Erro ao buscar dados da API:", error);
-        setLoading(false);
+        setData(highestIdData);
+      } else {
+        throw new Error("Estrutura dos dados da API está incorreta ou está vazia");
       }
-    };
+      setLoading(false);
+    } catch (error) {
+      console.error("Erro ao buscar dados da API:", error);
+      setError(error.message);
+      setLoading(false);
+    }
+  };
 
-    // Executar fetchData imediatamente
+  useEffect(() => {
+    // Executar fetchData imediatamente ao montar o componente
     fetchData();
 
     // Configurar intervalo para atualizar dados a cada minuto
@@ -55,12 +59,17 @@ export default function App() {
         style={styles.logo}
       />
       
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={fetchData}>
         <Text style={styles.buttonText}>F.O.D.A</Text>
       </TouchableOpacity>
 
       {loading ? (
         <Text>Carregando...</Text>
+      ) : error ? (
+        <View style={styles.errorBox}>
+          <Text style={styles.errorText}>Erro ao carregar dados:</Text>
+          <Text style={styles.errorMessage}>{error}</Text>
+        </View>
       ) : (
         data && (
           <View style={styles.dataBox}>
@@ -79,7 +88,6 @@ export default function App() {
   );
 }
 
-// Background color and center layout
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -132,5 +140,25 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: "black",
     fontWeight: 'bold',
+  },
+  errorBox: {
+    backgroundColor: "#FFCDD2",
+    width: "80%",
+    padding: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 50,
+  },
+  errorText: {
+    fontSize: 18,
+    color: "#D32F2F",
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  errorMessage: {
+    fontSize: 16,
+    color: "#D32F2F",
+    textAlign: 'center',
   }
 });
