@@ -3,7 +3,8 @@ import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import axios from 'axios';
 
 export default function App() {
-  const [data, setData] = useState(null);
+  const [sensorData, setSensorData] = useState(null);
+  const [evapotranspiracaoData, setEvapotranspiracaoData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -16,20 +17,19 @@ export default function App() {
       const json = response.data;
       
       // Log para depuração
-      console.log("Dados recebidos da API:");
+      console.log("Dados recebidos da API:", json);
 
-      if (Array.isArray(json) && json.length > 0) {
-        // Encontrar o item com o ID mais alto
-        const highestIdData = json.reduce((max, item) => {
+      if (json.SensorData && json.Evapotranspiracao) {
+        // Encontrar o item com o ID mais alto para SensorData
+        const highestIdSensorData = json.SensorData.reduce((max, item) => {
           const itemId = parseFloat(item.id);
           const maxId = parseFloat(max.id);
           return itemId > maxId ? item : max;
-        }, json[0]);
-        
-        // Log para depuração
-        console.log("Item com o ID mais alto:", highestIdData);
+        }, json.SensorData[0]);
 
-        setData(highestIdData);
+        // Armazenar os dados no estado
+        setSensorData(highestIdSensorData);
+        setEvapotranspiracaoData(json.Evapotranspiracao[0]?.valor);
       } else {
         throw new Error("Estrutura dos dados da API está incorreta ou está vazia");
       }
@@ -71,16 +71,17 @@ export default function App() {
           <Text style={styles.errorMessage}>{error}</Text>
         </View>
       ) : (
-        data && (
+        sensorData && (
           <View style={styles.dataBox}>
             <Text style={styles.dataText}>Últimos Dados:</Text>
-            <Text style={styles.dataLabel}>Local: {data.location}</Text>
+            <Text style={styles.dataLabel}>Local: {sensorData.location}</Text>
             <Text style={styles.dataText}></Text>
-            <Text style={styles.dataLabel}>ID: <Text style={styles.dataValue}>{data.id}</Text></Text>
-            <Text style={styles.dataLabel}>Umidade do Ar: <Text style={styles.dataValue}>{data.value1} %</Text></Text>
-            <Text style={styles.dataLabel}>Temperatura do Ar: <Text style={styles.dataValue}>{data.value2} °C</Text></Text>
-            <Text style={styles.dataLabel}>Umidade do Solo: <Text style={styles.dataValue}>{data.value3} %</Text></Text>
-            <Text style={styles.dataText}>Última Atualização: {data.reading_time}</Text>
+            <Text style={styles.dataLabel}>ID: <Text style={styles.dataValue}>{sensorData.id}</Text></Text>
+            <Text style={styles.dataLabel}>Umidade do Ar: <Text style={styles.dataValue}>{sensorData.value1} %</Text></Text>
+            <Text style={styles.dataLabel}>Temperatura do Ar: <Text style={styles.dataValue}>{sensorData.value2} °C</Text></Text>
+            <Text style={styles.dataLabel}>Umidade do Solo: <Text style={styles.dataValue}>{sensorData.value3} %</Text></Text>
+            <Text style={styles.dataLabel}>Evapotranspiração: <Text style={styles.dataValue}>{evapotranspiracaoData}</Text></Text>
+            <Text style={styles.dataText}>Última Atualização: {sensorData.reading_time}</Text>
           </View>
         )
       )}
